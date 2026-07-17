@@ -1,5 +1,5 @@
-ccxt
+Flask
+requests
+yfinance
 pandas
 pytz
-requests
-flask
