@@ -1,13 +1,14 @@
 import os, threading, time, requests
 from flask import Flask
 from datetime import datetime
-import yfinance as yf
+import pytz, yfinance as yf
+SGT=pytz.timezone('Asia/Singapore')
 BOT_TOKEN=os.getenv("BOT_TOKEN")
 CHAT_ID=os.getenv("CHAT_ID")
 app=Flask(__name__)
 @app.route('/')
 def home():
-    return "V5.1 BRAIN LIVE"
+    return "V5.2 SGT LIVE"
 def send_telegram(msg):
     try:
         requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", data={"chat_id":CHAT_ID,"text":msg,"parse_mode":"HTML"}, timeout=10)
@@ -20,8 +21,8 @@ def get_signal(sym):
             return None
         close=data['Close']
         delta=close.diff()
-        gain=(delta.where(delta>0,0)).rolling(14).mean()
-        loss=(-delta.where(delta<0,0)).rolling(14).mean()
+        gain=delta.where(delta>0,0).rolling(14).mean()
+        loss=-delta.where(delta<0,0).rolling(14).mean()
         rs=gain/loss
         rsi=100-(100/(1+rs))
         rsi_val=float(rsi.iloc[-1])
@@ -39,14 +40,16 @@ def get_signal(sym):
     except:
         return None
 def brain_loop():
-    send_telegram(f"🧠 <b>V5.1 SUPER BRAIN ONLINE - CLOUD 24/7</b>\n\n✅ RSI+EMA+BB Real\n✅ No guessing\n⏰ {datetime.now().strftime('%H:%M:%S')}")
+    now=datetime.now(SGT).strftime('%H:%M:%S')
+    send_telegram(f"🧠 <b>V5.2 ONLINE - {now} SGT</b>\n\n✅ Singapore Time\n✅ Real Filter\n⏰ {now} Singapore")
     pairs={"EUR/USD":"EURUSD=X","GBP/USD":"GBPUSD=X","USD/JPY":"JPY=X","AUD/USD":"AUDUSD=X","EUR/JPY":"EURJPY=X"}
     while True:
         for name, ysym in pairs.items():
             res=get_signal(ysym)
             if res:
                 direction,rsi=res
-                msg=f"📈 <b>V5.1 SIGNAL</b>\n\n💱 {name}\n📊 {direction}\n⏱ 1M | Exp 2-3M\n📉 RSI:{rsi:.1f}\n🎯 85%+\n⏰ {datetime.now().strftime('%H:%M:%S')}\n\n⚠️ 1% only!"
+                now=datetime.now(SGT).strftime('%H:%M:%S')
+                msg=f"📈 <b>V5.2 SIGNAL {now} SGT</b>\n\n💱 {name}\n📊 {direction}\n📉 RSI:{rsi:.1f}\n⏰ {now} Singapore"
                 send_telegram(msg)
                 time.sleep(120)
         time.sleep(30)
