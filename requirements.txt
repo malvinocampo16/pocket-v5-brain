@@ -1,5 +1,6 @@
 Flask
-requests
-yfinance
-pandas
 pytz
+pandas
+pandas-ta
+yfinance
+requests
