@@ -1,6 +1,5 @@
 Flask
 pytz
 pandas
-pandas-ta
 yfinance
 requests
